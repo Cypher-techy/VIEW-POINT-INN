@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{name}}">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="{{siteUrl}}/img/og.jpg">
+  <meta name="theme-color" content="#1c1613">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  {{preload}}
+  <link rel="stylesheet" href="/css/styles.css?v={{v}}">
+  <script src="/js/init.js?v={{v}}"></script>
+  <script src="/js/main.js?v={{v}}" defer></script>
+  {{scripts}}
+</head>
+<body data-whatsapp="{{whatsapp}}">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="{{name}}, home">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="27" cy="13" r="6" fill="currentColor" opacity=".55"/>
+          <path d="M2 34 15 12l7 10 5-6 11 18z" fill="currentColor"/>
+        </svg>
+        <span class="brand-text">Viewpoint Inn<small>Mbuinzau</small></span>
+      </a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Menu</span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <a href="/rooms">Rooms</a>
+        <a href="/dining">Dining</a>
+        <a href="/menu">Menu</a>
+        <a href="/events">Events</a>
+        <a href="/gallery">Gallery</a>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact</a>
+        <a href="/my-booking">My booking</a>
+        <a class="btn btn-small" href="/book">Book now</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+{{content}}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-brand">{{name}}</p>
+        <p>{{address}}</p>
+        <p><a href="tel:{{phoneTel}}">{{phoneDisplay}}</a></p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="/rooms">Rooms</a>
+        <a href="/dining">Dining</a>
+        <a href="/menu">Menu &amp; orders</a>
+        <a href="/events">Events</a>
+        <a href="/gallery">Gallery</a>
+        <a href="/faq">FAQs</a>
+        <a href="/contact">Contact</a>
+        <a href="/my-booking">My booking</a>
+        <a href="/book">Book now</a>
+      </nav>
+      <div>
+        <p class="footer-label">Follow us</p>
+        <div class="social-icons">
+          <a href="{{instagram}}" target="_blank" rel="noopener" aria-label="Viewpoint Inn on Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8"/></svg>
+          </a>
+          <a href="{{facebook}}" target="_blank" rel="noopener" aria-label="Viewpoint Inn on Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg>
+          </a>
+          <a href="{{tripadvisor}}" target="_blank" rel="noopener" aria-label="Viewpoint Inn on Tripadvisor">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="13" r="4"/><circle cx="17" cy="13" r="4"/><path d="M3 8c5-4 13-4 18 0M12 17l-1.500-2h3z"/></svg>
+          </a>
+          <a href="https://wa.me/{{whatsapp}}" target="_blank" rel="noopener" aria-label="Chat with Viewpoint Inn on WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.700 13.600L3 21l4.500-1.200A9 9 0 1 0 12 3z"/><path d="M8.500 8.500c0 3.500 3.500 7 7 7l1-2-2.200-1-1 1c-1-.4-2.400-1.800-2.800-2.800l1-1-1-2.200z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="container footer-note">
+      <span>&copy; {{year}} {{name}}. All rights reserved.</span>
+      <span class="footer-legal">
+        <a href="/terms">Terms &amp; conditions</a>
+        <a href="/privacy">Privacy policy</a>
+        <a href="/staff">Staff login</a>
+      </span>
+    </p>
+  </footer>
+
+  <a class="wa-float" href="https://wa.me/{{whatsapp}}" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.700 13.600L3 21l4.500-1.200A9 9 0 1 0 12 3z"/><path d="M8.500 8.500c0 3.500 3.500 7 7 7l1-2-2.200-1-1 1c-1-.4-2.400-1.800-2.800-2.800l1-1-1-2.200z"/></svg>
+  </a>
+</body>
+</html>

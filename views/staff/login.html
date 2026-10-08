@@ -1,0 +1,39 @@
+<!--meta {"layout":"none"}-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff login | {{name}}</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css?v={{v}}">
+  <link rel="stylesheet" href="/css/staff.css?v={{v}}">
+  <script src="/js/staff-login.js?v={{v}}" defer></script>
+</head>
+<body class="staff staff-login">
+  <main class="login-card">
+    <a class="brand brand-dark" href="/">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="27" cy="13" r="6" fill="currentColor" opacity=".55"/>
+        <path d="M2 34 15 12l7 10 5-6 11 18z" fill="currentColor"/>
+      </svg>
+      <span class="brand-text">Viewpoint Inn<small>Staff</small></span>
+    </a>
+    <h1>Staff login</h1>
+    <form id="login-form" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <p class="form-error" id="login-error" role="alert" hidden></p>
+      <button class="btn btn-block" type="submit">Sign in</button>
+    </form>
+    <p class="login-back"><a href="/">Back to the website</a></p>
+  </main>
+</body>
+</html>

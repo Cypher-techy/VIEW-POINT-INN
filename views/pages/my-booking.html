@@ -1,0 +1,34 @@
+<!--meta {"title":"My Booking | Viewpoint Inn Mbuinzau","description":"Check the status of your room, table, event booking or food order at Viewpoint Inn Mbuinzau.","scripts":["my-booking"]}-->
+    <section class="page-hero page-hero-plain">
+      <div class="container page-hero-content">
+        <p class="eyebrow">Guests</p>
+        <h1>My booking</h1>
+        <p>Check the status of a booking or food order, or cancel it.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container narrow">
+        <form class="booking-form reveal" id="lookup-form" novalidate>
+          <h2>Find your booking</h2>
+          <div class="field-row">
+            <div class="field"><label for="l-ref">Reference</label><input id="l-ref" name="ref" type="text" placeholder="VPR-XXXXX" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="12" required></div>
+            <div class="field"><label for="l-phone">Phone number used to book</label><input id="l-phone" name="phone" type="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="20" required></div>
+          </div>
+          <p class="form-error" id="lookup-error" role="alert" hidden></p>
+          <button class="btn btn-block" type="submit">Find booking</button>
+        </form>
+
+        <div class="booking-form lookup-result" id="lookup-result" tabindex="-1" hidden>
+          <p class="eyebrow" id="result-type"></p>
+          <h2 id="result-ref"></h2>
+          <p><span class="status" id="result-status"></span></p>
+          <p id="result-message"></p>
+          <dl class="info-list" id="result-details"></dl>
+          <div class="hero-actions">
+            <button class="btn btn-outline" type="button" id="result-cancel" hidden>Cancel this booking</button>
+            <a class="btn" href="https://wa.me/{{whatsapp}}" target="_blank" rel="noopener">Message us on WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </section>

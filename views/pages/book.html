@@ -1,0 +1,145 @@
+<!--meta {"title":"Book a Room, Table or Event | Viewpoint Inn Mbuinzau","description":"Book a room, reserve a table or plan an event at Viewpoint Inn Mbuinzau, Kibwezi. We confirm by phone or WhatsApp.","scripts":["booking"]}-->
+    <section class="page-hero page-hero-plain">
+      <div class="container page-hero-content">
+        <p class="eyebrow">Reservations</p>
+        <h1>Book with us</h1>
+        <p>Send your request and our team will confirm by phone or WhatsApp.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container booking-layout">
+        <div class="booking-main reveal">
+          <div class="tabs" role="tablist" aria-label="What would you like to book?">
+            <button class="tab" type="button" role="tab" id="tab-room" aria-controls="panel-room" aria-selected="true" data-tab="room">Room</button>
+            <button class="tab" type="button" role="tab" id="tab-table" aria-controls="panel-table" aria-selected="false" data-tab="table" tabindex="-1">Table</button>
+            <button class="tab" type="button" role="tab" id="tab-event" aria-controls="panel-event" aria-selected="false" data-tab="event" tabindex="-1">Event</button>
+          </div>
+
+          <div class="tab-panel" role="tabpanel" id="panel-room" aria-labelledby="tab-room" data-panel="room">
+            <form class="booking-form" data-booking="room" novalidate>
+              <h2>Book a room</h2>
+              <div class="field-row">
+                <div class="field"><label for="r-in">Check-in</label><input id="r-in" name="checkIn" type="date" required></div>
+                <div class="field"><label for="r-out">Check-out</label><input id="r-out" name="checkOut" type="date" required></div>
+              </div>
+              <div class="field">
+                <label for="r-type">Room type</label>
+                <select id="r-type" name="roomType">
+                  <option>Deluxe Single Room</option>
+                  <option>Deluxe Double Room</option>
+                  <option>Business Apartment</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="r-rooms">Rooms</label><input id="r-rooms" name="rooms" type="number" min="1" max="10" value="1" inputmode="numeric" required></div>
+                <div class="field"><label for="r-guests">Guests</label><input id="r-guests" name="guests" type="number" min="1" max="20" value="1" inputmode="numeric" required></div>
+              </div>
+              <div class="field"><label for="r-name">Full name</label><input id="r-name" name="name" type="text" autocomplete="name" maxlength="80" required></div>
+              <div class="field-row">
+                <div class="field"><label for="r-phone">Phone</label><input id="r-phone" name="phone" type="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="20" required></div>
+                <div class="field"><label for="r-email">Email <span class="optional">(optional)</span></label><input id="r-email" name="email" type="email" autocomplete="email" maxlength="120"></div>
+              </div>
+              <div class="field"><label for="r-notes">Special requests <span class="optional">(optional)</span></label><textarea id="r-notes" name="notes" rows="3" maxlength="600"></textarea></div>
+              <div class="hp" aria-hidden="true"><label for="r-web">Leave this empty</label><input id="r-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+              <p class="form-error" role="alert" hidden></p>
+              <button class="btn btn-block" type="submit">Request room booking</button>
+            </form>
+          </div>
+
+          <div class="tab-panel" role="tabpanel" id="panel-table" aria-labelledby="tab-table" data-panel="table" hidden>
+            <form class="booking-form" data-booking="table" novalidate>
+              <h2>Reserve a table</h2>
+              <div class="field-row">
+                <div class="field"><label for="t-date">Date</label><input id="t-date" name="date" type="date" required></div>
+                <div class="field"><label for="t-time">Time</label><input id="t-time" name="time" type="time" required></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="t-guests">Guests</label><input id="t-guests" name="guests" type="number" min="1" max="30" value="2" inputmode="numeric" required></div>
+                <div class="field">
+                  <label for="t-area">Seating</label>
+                  <select id="t-area" name="area">
+                    <option>Restaurant</option>
+                    <option>Garden</option>
+                    <option>Bar &amp; Lounge</option>
+                    <option>VIP Lounge</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field"><label for="t-name">Full name</label><input id="t-name" name="name" type="text" autocomplete="name" maxlength="80" required></div>
+              <div class="field-row">
+                <div class="field"><label for="t-phone">Phone</label><input id="t-phone" name="phone" type="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="20" required></div>
+                <div class="field"><label for="t-email">Email <span class="optional">(optional)</span></label><input id="t-email" name="email" type="email" autocomplete="email" maxlength="120"></div>
+              </div>
+              <div class="field"><label for="t-notes">Occasion or requests <span class="optional">(optional)</span></label><textarea id="t-notes" name="notes" rows="3" maxlength="600"></textarea></div>
+              <div class="hp" aria-hidden="true"><label for="t-web">Leave this empty</label><input id="t-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+              <p class="form-error" role="alert" hidden></p>
+              <button class="btn btn-block" type="submit">Request table reservation</button>
+            </form>
+          </div>
+
+          <div class="tab-panel" role="tabpanel" id="panel-event" aria-labelledby="tab-event" data-panel="event" hidden>
+            <form class="booking-form" data-booking="event" novalidate>
+              <h2>Plan an event</h2>
+              <div class="field">
+                <label for="e-type">Type of event</label>
+                <select id="e-type" name="eventType">
+                  <option>Wedding</option>
+                  <option>Birthday or party</option>
+                  <option>Conference or meeting</option>
+                  <option>Corporate function</option>
+                  <option>Team retreat</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="e-date">Event date</label><input id="e-date" name="date" type="date" required></div>
+                <div class="field"><label for="e-time">Start time <span class="optional">(optional)</span></label><input id="e-time" name="startTime" type="time"></div>
+              </div>
+              <div class="field"><label for="e-guests">Expected guests</label><input id="e-guests" name="guests" type="number" min="1" max="200" value="50" inputmode="numeric" required></div>
+              <fieldset class="field check-group">
+                <legend>What will you need? <span class="optional">(optional)</span></legend>
+                <label><input type="checkbox" name="services" value="Catering"> Catering</label>
+                <label><input type="checkbox" name="services" value="Guest rooms"> Guest rooms</label>
+                <label><input type="checkbox" name="services" value="Conference room"> Conference room</label>
+                <label><input type="checkbox" name="services" value="Garden space"> Garden space</label>
+              </fieldset>
+              <div class="field"><label for="e-name">Full name</label><input id="e-name" name="name" type="text" autocomplete="name" maxlength="80" required></div>
+              <div class="field-row">
+                <div class="field"><label for="e-phone">Phone</label><input id="e-phone" name="phone" type="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="20" required></div>
+                <div class="field"><label for="e-email">Email <span class="optional">(optional)</span></label><input id="e-email" name="email" type="email" autocomplete="email" maxlength="120"></div>
+              </div>
+              <div class="field"><label for="e-notes">Tell us about the event <span class="optional">(optional)</span></label><textarea id="e-notes" name="notes" rows="3" maxlength="600"></textarea></div>
+              <div class="hp" aria-hidden="true"><label for="e-web">Leave this empty</label><input id="e-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+              <p class="form-error" role="alert" hidden></p>
+              <button class="btn btn-block" type="submit">Request event booking</button>
+            </form>
+          </div>
+
+          <div class="booking-success" id="booking-success" tabindex="-1" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m7.500 12.500 3 3 6-6.500"/></svg>
+            <h2>Request received</h2>
+            <p>Thank you. Your reference is</p>
+            <p class="booking-ref" id="booking-ref"></p>
+            <p>Our team will call or WhatsApp you to confirm. Your booking is not confirmed until you hear from us. Keep this reference to check or cancel it under <a class="text-link" href="/my-booking">My booking</a>.</p>
+            <div class="hero-actions">
+              <a class="btn" id="booking-wa" href="#" target="_blank" rel="noopener">Message us on WhatsApp</a>
+              <button class="btn btn-outline" type="button" id="booking-again">Make another booking</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="booking-aside reveal">
+          <h2>Prefer to talk?</h2>
+          <p>Our front desk is open 24 hours.</p>
+          <p><a class="phone-link" href="tel:{{phoneTel}}">{{phoneDisplay}}</a></p>
+          <p><a class="text-link" href="https://wa.me/{{whatsapp}}" target="_blank" rel="noopener">Chat on WhatsApp</a></p>
+          <h3 class="sub-head">How it works</h3>
+          <ol class="steps">
+            <li>Send your request using the form.</li>
+            <li>We check availability and contact you with the rate.</li>
+            <li>Once you agree, your booking is confirmed.</li>
+          </ol>
+        </aside>
+      </div>
+    </section>

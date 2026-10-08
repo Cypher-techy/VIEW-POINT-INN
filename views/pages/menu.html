@@ -1,0 +1,56 @@
+<!--meta {"title":"Menu & Food Orders | Viewpoint Inn Mbuinzau","description":"See the Viewpoint Inn menu and order food online to eat in, collect or have delivered to your room.","hero":"bar","scripts":["menu"]}-->
+    <section class="page-hero">
+      {{img:bar|The bar counter with high stools and shelves of drinks|100vw|page-hero-img|eager}}
+      <div class="container page-hero-content">
+        <p class="eyebrow">Eat &amp; drink</p>
+        <h1>Menu</h1>
+        <p>Order ahead to eat in, collect on your way past, or have it brought to your room.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container booking-layout">
+        <div>
+          <p class="menu-status" id="menu-status" role="status">Loading the menu&hellip;</p>
+          <div class="chips" id="menu-filters" role="group" aria-label="Menu categories" hidden></div>
+          <div id="menu-list"></div>
+        </div>
+
+        <aside class="booking-aside cart" id="cart" aria-label="Your order" hidden>
+          <div id="cart-body">
+            <h2>Your order</h2>
+            <p id="cart-empty">Nothing added yet. Choose something from the menu.</p>
+            <ul class="cart-lines" id="cart-lines"></ul>
+            <p class="cart-total" id="cart-total-row" hidden><span>Total</span><strong id="cart-total"></strong></p>
+
+            <form id="order-form" novalidate hidden>
+              <div class="field">
+                <label for="o-mode">How would you like it?</label>
+                <select id="o-mode" name="mode">
+                  <option>Eat in</option>
+                  <option>Pickup</option>
+                  <option>Room delivery</option>
+                </select>
+              </div>
+              <div class="field"><label for="o-location" id="o-location-label">Table number <span class="optional">(optional)</span></label><input id="o-location" name="location" type="text" maxlength="30"></div>
+              <div class="field"><label for="o-name">Full name</label><input id="o-name" name="name" type="text" autocomplete="name" maxlength="80" required></div>
+              <div class="field"><label for="o-phone">Phone</label><input id="o-phone" name="phone" type="tel" autocomplete="tel" placeholder="07XX XXX XXX" maxlength="20" required></div>
+              <div class="field"><label for="o-notes">Notes for the kitchen <span class="optional">(optional)</span></label><textarea id="o-notes" name="notes" rows="2" maxlength="300"></textarea></div>
+              <div class="hp" aria-hidden="true"><label for="o-web">Leave this empty</label><input id="o-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+              <p class="form-error" role="alert" hidden></p>
+              <button class="btn btn-block" type="submit">Place order</button>
+              <p class="form-hint">You pay at the inn. We will call if anything is unavailable.</p>
+            </form>
+          </div>
+
+          <div id="order-success" tabindex="-1" hidden>
+            <h2>Order received</h2>
+            <p>Your reference is</p>
+            <p class="booking-ref" id="order-ref"></p>
+            <p id="order-summary"></p>
+            <p>Check its progress any time under <a class="text-link" href="/my-booking">My booking</a>.</p>
+            <button class="btn btn-outline btn-block" type="button" id="order-again">Order something else</button>
+          </div>
+        </aside>
+      </div>
+    </section>

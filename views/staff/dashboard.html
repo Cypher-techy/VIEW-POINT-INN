@@ -1,0 +1,156 @@
+<!--meta {"layout":"none"}-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Staff dashboard | {{name}}</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css?v={{v}}">
+  <link rel="stylesheet" href="/css/staff.css?v={{v}}">
+  <script src="/js/staff.js?v={{v}}" defer></script>
+</head>
+<body class="staff">
+  <header class="staff-bar">
+    <div class="container staff-bar-inner">
+      <a class="brand" href="/staff/dashboard">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="27" cy="13" r="6" fill="currentColor" opacity=".55"/>
+          <path d="M2 34 15 12l7 10 5-6 11 18z" fill="currentColor"/>
+        </svg>
+        <span class="brand-text">Viewpoint Inn<small>Staff dashboard</small></span>
+      </a>
+      <div class="staff-bar-actions">
+        <span class="staff-user" id="staff-user"></span>
+        <a class="bar-link" href="/" target="_blank" rel="noopener">View website</a>
+        <button class="bar-link" type="button" id="logout">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container staff-main">
+    <p class="notice" id="pw-notice" hidden>
+      You are using a temporary password.
+      <button class="link-button" type="button" data-view-link="account">Change it now</button>
+    </p>
+
+    <section class="stats" aria-label="Summary">
+      <div class="stat"><strong id="stat-pending">0</strong><span>Awaiting confirmation</span></div>
+      <div class="stat"><strong id="stat-arrivals">0</strong><span>Room arrivals today</span></div>
+      <div class="stat"><strong id="stat-tables">0</strong><span>Tables today</span></div>
+      <div class="stat"><strong id="stat-events">0</strong><span>Upcoming events</span></div>
+    </section>
+
+    <nav class="staff-tabs" aria-label="Dashboard sections">
+      <button type="button" data-view="room" aria-current="true">Rooms <span class="badge" id="badge-room" hidden></span></button>
+      <button type="button" data-view="table">Tables <span class="badge" id="badge-table" hidden></span></button>
+      <button type="button" data-view="event">Events <span class="badge" id="badge-event" hidden></span></button>
+      <button type="button" data-view="order">Food orders <span class="badge" id="badge-order" hidden></span></button>
+      <button type="button" data-view="menu">Menu</button>
+      <button type="button" data-view="reviews">Reviews <span class="badge" id="badge-reviews" hidden></span></button>
+      <button type="button" data-view="staff" id="tab-staff" hidden>Staff</button>
+      <button type="button" data-view="account">My account</button>
+    </nav>
+
+    <section id="view-bookings">
+      <div class="toolbar">
+        <div class="field">
+          <label for="filter-status">Show</label>
+          <select id="filter-status">
+            <option value="active">Open (not yet completed)</option>
+            <option value="pending">Pending only</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="all">All bookings</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label for="filter-search">Search</label>
+          <input id="filter-search" type="search" placeholder="Name, phone or reference">
+        </div>
+        <button class="btn btn-outline btn-small" type="button" id="refresh">Refresh</button>
+      </div>
+      <p class="form-error" id="bookings-error" role="alert" hidden></p>
+      <div class="table-wrap">
+        <table class="bookings">
+          <thead>
+            <tr><th>Reference</th><th>Guest</th><th>Booking</th><th>Notes</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="bookings-body"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="bookings-empty" hidden>No bookings match this view.</p>
+      <p class="updated" id="updated"></p>
+    </section>
+
+    <section id="view-menu" hidden>
+      <div class="panel-grid">
+        <div class="panel">
+          <h2>Menu</h2>
+          <p class="sub">Items marked available appear on the website and can be ordered.</p>
+          <p class="form-error" id="menu-error" role="alert" hidden></p>
+          <div id="menu-admin"></div>
+          <p class="empty" id="menu-empty" hidden>The menu is empty. Add your first dish or drink.</p>
+        </div>
+        <form class="panel" id="menu-form" novalidate>
+          <h2>Add to the menu</h2>
+          <div class="field"><label for="m-name">Name</label><input id="m-name" name="name" type="text" maxlength="60" required></div>
+          <div class="field"><label for="m-category">Category</label><select id="m-category" name="category"></select></div>
+          <div class="field"><label for="m-price">Price in KSh</label><input id="m-price" name="price" type="number" min="0" step="1" inputmode="numeric" required></div>
+          <div class="field"><label for="m-desc">Short description <span class="optional">(optional)</span></label><input id="m-desc" name="description" type="text" maxlength="160"></div>
+          <p class="form-error" id="menu-form-error" role="alert" hidden></p>
+          <button class="btn" type="submit">Add item</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="view-reviews" hidden>
+      <div class="panel">
+        <h2>Guest reviews</h2>
+        <p class="sub">Only approved reviews are shown on the website.</p>
+        <p class="form-error" id="reviews-error" role="alert" hidden></p>
+        <ul class="user-list" id="review-admin"></ul>
+        <p class="empty" id="reviews-empty" hidden>No reviews yet.</p>
+      </div>
+    </section>
+
+    <section id="view-staff" hidden>
+      <div class="panel-grid">
+        <div class="panel">
+          <h2>Staff accounts</h2>
+          <ul class="user-list" id="user-list"></ul>
+        </div>
+        <form class="panel" id="user-form" novalidate>
+          <h2>Add a staff member</h2>
+          <div class="field"><label for="u-name">Full name</label><input id="u-name" name="name" type="text" maxlength="80" required></div>
+          <div class="field"><label for="u-username">Username</label><input id="u-username" name="username" type="text" autocapitalize="none" spellcheck="false" maxlength="30" required></div>
+          <div class="field"><label for="u-password">Temporary password</label><input id="u-password" name="password" type="text" autocomplete="off" minlength="8" maxlength="128" required></div>
+          <div class="field">
+            <label for="u-role">Role</label>
+            <select id="u-role" name="role">
+              <option value="staff">Staff: manage bookings</option>
+              <option value="admin">Administrator: also manage staff and delete bookings</option>
+            </select>
+          </div>
+          <p class="form-error" id="user-error" role="alert" hidden></p>
+          <p class="form-ok" id="user-ok" role="status" hidden></p>
+          <button class="btn" type="submit">Add staff member</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="view-account" hidden>
+      <form class="panel panel-narrow" id="password-form" novalidate>
+        <h2>Change password</h2>
+        <div class="field"><label for="p-current">Current password</label><input id="p-current" name="current" type="password" autocomplete="current-password" required></div>
+        <div class="field"><label for="p-next">New password</label><input id="p-next" name="next" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+        <div class="field"><label for="p-confirm">Repeat new password</label><input id="p-confirm" name="confirm" type="password" autocomplete="new-password" required></div>
+        <p class="form-error" id="password-error" role="alert" hidden></p>
+        <p class="form-ok" id="password-ok" role="status" hidden></p>
+        <button class="btn" type="submit">Change password</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
