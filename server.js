@@ -1051,8 +1051,21 @@ async function handle(req, res) {
   sendPage(req, res, 'pages/404', { status: 404 });
 }
 
+// On Vercel, vercel.json rewrites every address to /api/index?__path=<original path>.
+// Put the original address back before routing.
+function restoreOriginalUrl(req) {
+  if (!ON_VERCEL || req.url.indexOf('__path=') < 0) return;
+  const url = new URL(req.url, 'http://localhost');
+  const original = url.searchParams.get('__path');
+  if (original === null) return;
+  url.searchParams.delete('__path');
+  const query = url.searchParams.toString();
+  req.url = '/' + original.replace(/^\/+/, '') + (query ? '?' + query : '');
+}
+
 async function handler(req, res) {
   try {
+    restoreOriginalUrl(req);
     const needsData = USE_SUPABASE && /^\/(api|staff)(\/|$|\?)/.test(req.url);
     if (needsData) {
       await withRemoteLock(async function () {
