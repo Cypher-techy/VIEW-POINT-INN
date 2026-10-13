@@ -2,6 +2,10 @@
 
 // Viewpoint Inn Mbuinzau: website, booking API and staff dashboard.
 // No dependencies. Run with: node server.js
+//
+// Storage: a JSON file in ./data by default. When SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set,
+// records are kept in a Supabase table instead, which is required on hosts such as Vercel that
+// do not allow writing to disk.
 
 const http = require('http');
 const fs = require('fs');
@@ -17,9 +21,18 @@ const DB_FILE = path.join(DATA_DIR, 'db.json');
 const FIRST_LOGIN_FILE = path.join(DATA_DIR, 'first-login.txt');
 
 const PORT = Number(process.env.PORT) || 4000;
+const ON_VERCEL = Boolean(process.env.VERCEL);
 // Set TRUST_PROXY=1 when running behind a reverse proxy that sets X-Forwarded-* headers.
-const TRUST_PROXY = process.env.TRUST_PROXY === '1';
-const VERSION = Date.now().toString(36);
+const TRUST_PROXY = process.env.TRUST_PROXY === '1' || ON_VERCEL;
+// Changes whenever the code does, so browsers fetch fresh CSS and JS after an update.
+const VERSION = (process.env.VERCEL_GIT_COMMIT_SHA || '').slice(0, 10) || Date.now().toString(36);
+
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
+const SUPABASE_TABLE = 'vp_records';
+const USE_SUPABASE = Boolean(SUPABASE_URL && SUPABASE_KEY);
+// Vercel has a read-only disk, so without Supabase there is nowhere to keep bookings.
+const STORAGE_MISSING = ON_VERCEL && !USE_SUPABASE;
 
 const SITE = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.config.json'), 'utf8'));
 const IMAGES = JSON.parse(fs.readFileSync(path.join(PUBLIC_DIR, 'img', 'manifest.json'), 'utf8'));
@@ -61,7 +74,15 @@ class HttpError extends Error {
 
 /* ---------- Storage ---------- */
 
-let db = { users: [], sessions: [], bookings: [], orders: [], menu: [], reviews: [] };
+const COLLECTIONS = ['users', 'sessions', 'bookings', 'orders', 'menu', 'reviews'];
+
+function emptyDb() {
+  const fresh = {};
+  COLLECTIONS.forEach(function (name) { fresh[name] = []; });
+  return fresh;
+}
+
+let db = emptyDb();
 
 function loadDb() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -71,11 +92,104 @@ function loadDb() {
   db.sessions = db.sessions.filter(function (s) { return s.expiresAt > Date.now(); });
 }
 
-// Write to a temp file then rename, so a crash mid-write cannot corrupt the database.
+// File mode: write to a temp file then rename, so a crash mid-write cannot corrupt the database.
+// Supabase mode: only note that something changed; the request wrapper sends the changes
+// before the response goes out (see flushRemote).
 function saveDb() {
+  if (USE_SUPABASE) {
+    remoteDirty = true;
+    return;
+  }
   const tmp = DB_FILE + '.tmp';
   fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
   fs.renameSync(tmp, DB_FILE);
+}
+
+/* ---------- Supabase storage ---------- */
+
+// Each record is one row: (collection, id, data). Every data request loads the rows into `db`,
+// the handlers work on it exactly as in file mode, and afterwards only the rows that changed
+// are written back. Two visitors booking at the same moment therefore cannot overwrite each other.
+
+let remoteDirty = false;
+let remoteSnapshot = new Map(); // "collection/id" -> JSON of the row as loaded
+
+function recordId(record) {
+  return record.id || record.tokenHash; // sessions are keyed by their token hash
+}
+
+async function supabase(method, query, body, prefer) {
+  const headers = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+  if (prefer) headers.Prefer = prefer;
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + query, {
+    method: method,
+    headers: headers,
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    throw new Error('Supabase ' + method + ' failed (' + res.status + '): ' + (await res.text()).slice(0, 300));
+  }
+  return method === 'GET' ? res.json() : null;
+}
+
+async function loadRemote() {
+  const PAGE = 1000; // Supabase returns at most 1000 rows per request
+  const fresh = emptyDb();
+  const snapshot = new Map();
+  for (let offset = 0; ; offset += PAGE) {
+    const rows = await supabase('GET', '?select=collection,id,data&order=collection,id&limit=' + PAGE + '&offset=' + offset);
+    rows.forEach(function (row) {
+      if (!fresh[row.collection]) return;
+      fresh[row.collection].push(row.data);
+      snapshot.set(row.collection + '/' + row.id, JSON.stringify(row.data));
+    });
+    if (rows.length < PAGE) break;
+  }
+  // Keep records in the order they were created, as the file store does.
+  COLLECTIONS.forEach(function (name) {
+    fresh[name].sort(function (a, b) { return String(a.createdAt || '') < String(b.createdAt || '') ? -1 : 1; });
+  });
+  db = fresh;
+  remoteSnapshot = snapshot;
+  remoteDirty = false;
+}
+
+async function flushRemote() {
+  if (!remoteDirty) return;
+  const changed = [];
+  const present = new Set();
+  COLLECTIONS.forEach(function (name) {
+    db[name].forEach(function (record) {
+      const key = name + '/' + recordId(record);
+      present.add(key);
+      if (remoteSnapshot.get(key) !== JSON.stringify(record)) {
+        changed.push({ collection: name, id: recordId(record), data: record });
+      }
+    });
+  });
+  const removed = {};
+  remoteSnapshot.forEach(function (value, key) {
+    if (present.has(key)) return;
+    const slash = key.indexOf('/');
+    (removed[key.slice(0, slash)] = removed[key.slice(0, slash)] || []).push(key.slice(slash + 1));
+  });
+
+  if (changed.length) {
+    await supabase('POST', '?on_conflict=collection,id', changed, 'resolution=merge-duplicates,return=minimal');
+  }
+  for (const name of Object.keys(removed)) {
+    const ids = removed[name].map(function (id) { return '"' + id + '"'; }).join(',');
+    await supabase('DELETE', '?collection=eq.' + name + '&id=in.(' + encodeURIComponent(ids) + ')', null, 'return=minimal');
+  }
+  remoteDirty = false;
+}
+
+// One data request at a time per server instance, so a second request cannot swap `db` mid-way.
+let remoteQueue = Promise.resolve();
+function withRemoteLock(task) {
+  const run = remoteQueue.then(task, task);
+  remoteQueue = run.catch(function () {});
+  return run;
 }
 
 /* ---------- Passwords and sessions ---------- */
@@ -98,17 +212,24 @@ function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
+// Fixed id, so two server instances starting at once create the same row rather than two admins.
+const FIRST_ADMIN_ID = '00000000-0000-4000-8000-000000000001';
+
 function ensureAdmin() {
   if (db.users.length) return;
   const fromEnv = process.env.ADMIN_PASSWORD;
+  if (USE_SUPABASE && !fromEnv) {
+    console.warn('No staff accounts exist. Set the ADMIN_PASSWORD environment variable to create the first one.');
+    return;
+  }
   const password = fromEnv || crypto.randomBytes(9).toString('base64url');
   db.users.push({
-    id: crypto.randomUUID(),
+    id: FIRST_ADMIN_ID,
     username: 'admin',
     name: 'Administrator',
     role: 'admin',
     passwordHash: hashPassword(password),
-    mustChangePassword: !fromEnv,
+    mustChangePassword: true,
     createdAt: new Date().toISOString()
   });
   saveDb();
@@ -425,7 +546,17 @@ function sendPage(req, res, name, options) {
   sendEntry(req, res, renderPage(name), opts.private ? 'no-store' : 'no-cache', opts.status);
 }
 
+// In Supabase mode the reply is held until the changes are safely stored (see handler),
+// so a guest is never told "booked" for something that failed to save.
 function json(res, status, data) {
+  if (res.deferJson) {
+    res.pendingJson = { status: status, data: data };
+    return;
+  }
+  writeJson(res, status, data);
+}
+
+function writeJson(res, status, data) {
   const body = JSON.stringify(data);
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -668,6 +799,7 @@ async function login(req, res) {
   if (!ok) return json(res, 401, { error: 'Incorrect username or password.' });
 
   const token = crypto.randomBytes(32).toString('base64url');
+  db.sessions = db.sessions.filter(function (s) { return s.expiresAt > Date.now(); });
   db.sessions.push({ tokenHash: sha256(token), userId: user.id, expiresAt: Date.now() + SESSION_HOURS * 3600 * 1000 });
   saveDb();
   res.setHeader('Set-Cookie', sessionCookie(req, token, SESSION_HOURS * 3600));
@@ -690,7 +822,7 @@ async function changePassword(req, res, auth) {
   // Sign out every other device using this account.
   db.sessions = db.sessions.filter(function (s) { return s.userId !== auth.user.id || s === auth.session; });
   saveDb();
-  if (auth.user.username === 'admin') fs.rmSync(FIRST_LOGIN_FILE, { force: true });
+  if (auth.user.username === 'admin' && !USE_SUPABASE) fs.rmSync(FIRST_LOGIN_FILE, { force: true });
   json(res, 200, { user: publicUser(auth.user) });
 }
 
@@ -789,6 +921,11 @@ function deleteUser(res, auth, id) {
 
 async function api(req, res, pathname) {
   const method = req.method;
+  if (STORAGE_MISSING) {
+    if (pathname === '/api/menu') return json(res, 200, { categories: MENU_CATEGORIES, items: [] });
+    if (pathname === '/api/reviews' && method === 'GET') return json(res, 200, { reviews: [] });
+    return json(res, 503, { error: 'Online booking is not switched on yet. Please call or WhatsApp us instead.' });
+  }
 
   // Browsers send Origin on cross-site writes; reject any that are not from this site.
   if (method !== 'GET' && req.headers.origin) {
@@ -914,17 +1051,41 @@ async function handle(req, res) {
   sendPage(req, res, 'pages/404', { status: 404 });
 }
 
-loadDb();
-ensureAdmin();
-
-http.createServer(function (req, res) {
-  handle(req, res).catch(function (err) {
+async function handler(req, res) {
+  try {
+    const needsData = USE_SUPABASE && /^\/(api|staff)(\/|$|\?)/.test(req.url);
+    if (needsData) {
+      await withRemoteLock(async function () {
+        await loadRemote();
+        ensureAdmin();
+        res.deferJson = true;
+        await handle(req, res);
+        await flushRemote();
+      });
+    } else {
+      await handle(req, res);
+    }
+    if (res.pendingJson) writeJson(res, res.pendingJson.status, res.pendingJson.data);
+  } catch (err) {
     if (res.headersSent) return res.end();
-    if (err instanceof HttpError) return json(res, err.status, { error: err.message });
+    if (err instanceof HttpError) return writeJson(res, err.status, { error: err.message });
     console.error(err);
-    json(res, 500, { error: 'Something went wrong on our side. Please try again.' });
+    writeJson(res, 500, { error: 'Something went wrong on our side. Please try again.' });
+  }
+}
+
+if (!USE_SUPABASE && !STORAGE_MISSING) {
+  loadDb();
+  ensureAdmin();
+}
+
+// Run directly (node server.js) it listens on a port; on Vercel it is imported by api/index.js instead.
+if (require.main === module) {
+  http.createServer(handler).listen(PORT, function () {
+    console.log('Viewpoint Inn website running at http://localhost:' + PORT);
+    console.log('Staff dashboard at http://localhost:' + PORT + '/staff');
+    console.log('Storage: ' + (USE_SUPABASE ? 'Supabase' : 'data/db.json'));
   });
-}).listen(PORT, function () {
-  console.log('Viewpoint Inn website running at http://localhost:' + PORT);
-  console.log('Staff dashboard at http://localhost:' + PORT + '/staff');
-});
+}
+
+module.exports = handler;
